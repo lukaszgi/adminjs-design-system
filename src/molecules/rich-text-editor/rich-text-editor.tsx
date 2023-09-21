@@ -12,7 +12,7 @@ import Typography from '@tiptap/extension-typography'
 // https://github.com/ueberdosis/tiptap/issues/3488
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, Extension, Extensions, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import React, { FC, useCallback } from 'react'
 
@@ -24,6 +24,8 @@ interface EditorOptions {
 }
 interface RichTextEditorOptions extends Partial<EditorOptions> {
   limit?: number
+  addDefaultExtensions?: boolean
+  extensions?: Extensions
 }
 
 interface RichTextEditorProps {
@@ -38,20 +40,23 @@ const RichTextEditor: FC<RichTextEditorProps> = (props) => {
     onChange(editor.getHTML())
   }, [])
 
-  const { limit, extensions = [], ...restOptions } = options
+  const { limit, addDefaultExtensions, extensions = [], ...restOptions } = options
+  const defaultExtensions = [
+    StarterKit,
+    CharacterCount.configure({ limit, mode: 'nodeSize' }),
+    Image,
+    Link.configure({ openOnClick: false }),
+    Table,
+    TableCell,
+    TableHeader,
+    TableRow,
+    TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
+    Typography,
+  ] as Extensions
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      CharacterCount.configure({ limit, mode: 'nodeSize' }),
-      Image,
-      Link.configure({ openOnClick: false }),
-      Table,
-      TableCell,
-      TableHeader,
-      TableRow,
-      TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
-      Typography,
+      ...(addDefaultExtensions ? defaultExtensions : []),
       ...extensions,
     ],
     content: value,
